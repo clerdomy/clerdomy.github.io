@@ -3,194 +3,414 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini Game</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Space Combat - Batalha Espacial</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+        }
+
+        #gameCanvas {
+            width: 100vw;
+            height: 100vh;
+            display: block;
+        }
+
+        #score {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: #fff;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        #health {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            color: #fff;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        #gameOver {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8);
+            padding: 20px;
+            border-radius: 10px;
+            color: #fff;
+            text-align: center;
+            display: none;
+        }
+
+        #gameOver h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: #ff0000;
+        }
+
+        #gameOver button {
+            padding: 10px 20px;
+            font-size: 18px;
+            background: #ff0000;
+            border: none;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #gameOver button:hover {
+            background: #cc0000;
+        }
+    </style>
 </head>
-<body class="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 min-h-screen flex flex-col items-center justify-center p-4">
-    <div class="text-center mb-6">
-        <h1 class="text-4xl font-bold text-white mb-2">Mini Game</h1>
-        <p class="text-white text-lg mb-4">Use as setas ← → para mover a plataforma</p>
-        <p class="text-white text-lg mb-4">Pontuação: <span id="score">0</span></p>
-    </div>
-
-    <canvas id="gameCanvas" class="bg-white/10 backdrop-blur-sm rounded-lg shadow-xl mb-6" width="400" height="400"></canvas>
-
-    <div class="flex gap-4">
-        <button onclick="resetGame()" class="bg-white/20 hover:bg-white/30 text-white font-bold py-2 px-6 rounded-full transition-all duration-300 backdrop-blur-sm">
-            Reiniciar
-        </button>
-        <a href="https://clerdomy.github.io/clerdomy" class="bg-white/20 hover:bg-white/30 text-white font-bold py-2 px-6 rounded-full transition-all duration-300 backdrop-blur-sm">
-            Ir para o Site
-        </a>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <div id="score">Pontos: 0</div>
+    <div id="health">Vida: 100%</div>
+    <div id="gameOver">
+        <h2>Game Over!</h2>
+        <p>Sua pontuação: <span id="finalScore">0</span></p>
+        <button onclick="restartGame()">Jogar Novamente</button>
     </div>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const scoreElement = document.getElementById('score');
+        const healthElement = document.getElementById('health');
+        const gameOverElement = document.getElementById('gameOver');
+        const finalScoreElement = document.getElementById('finalScore');
 
-        // Game objects
-        const ball = {
-            x: canvas.width / 2,
-            y: canvas.height - 30,
-            dx: 3,
-            dy: -3,
-            radius: 8
-        };
-
-        const paddle = {
-            width: 75,
-            height: 10,
-            x: (canvas.width - 75) / 2,
-            speed: 7
-        };
-
-        const brickRowCount = 4;
-        const brickColumnCount = 5;
-        const brickWidth = 65;
-        const brickHeight = 20;
-        const brickPadding = 10;
-        const brickOffsetTop = 30;
-        const brickOffsetLeft = 30;
-
-        let score = 0;
-        let rightPressed = false;
-        let leftPressed = false;
-
-        // Create bricks
-        const bricks = [];
-        for(let c = 0; c < brickColumnCount; c++) {
-            bricks[c] = [];
-            for(let r = 0; r < brickRowCount; r++) {
-                bricks[c][r] = { x: 0, y: 0, status: 1 };
-            }
+        // Configuração do canvas
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
         }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
 
-        // Event listeners
-        document.addEventListener('keydown', keyDownHandler);
-        document.addEventListener('keyup', keyUpHandler);
-
-        function keyDownHandler(e) {
-            if(e.key === 'Right' || e.key === 'ArrowRight') {
-                rightPressed = true;
+        // Classes do jogo
+        class Player {
+            constructor() {
+                this.width = 50;
+                this.height = 50;
+                this.x = canvas.width / 2 - this.width / 2;
+                this.y = canvas.height - this.height - 20;
+                this.speed = 8;
+                this.health = 100;
+                this.score = 0;
+                this.bullets = [];
+                this.lastShot = 0;
+                this.shotDelay = 250; // Delay entre tiros em ms
             }
-            else if(e.key === 'Left' || e.key === 'ArrowLeft') {
-                leftPressed = true;
+
+            draw() {
+                // Desenha a nave do jogador
+                ctx.fillStyle = '#00ff00';
+                ctx.beginPath();
+                ctx.moveTo(this.x + this.width / 2, this.y);
+                ctx.lineTo(this.x + this.width, this.y + this.height);
+                ctx.lineTo(this.x, this.y + this.height);
+                ctx.closePath();
+                ctx.fill();
+
+                // Desenha o efeito de propulsão
+                ctx.fillStyle = '#ff6600';
+                ctx.beginPath();
+                ctx.moveTo(this.x + this.width * 0.3, this.y + this.height);
+                ctx.lineTo(this.x + this.width * 0.5, this.y + this.height + 15);
+                ctx.lineTo(this.x + this.width * 0.7, this.y + this.height);
+                ctx.closePath();
+                ctx.fill();
             }
-        }
 
-        function keyUpHandler(e) {
-            if(e.key === 'Right' || e.key === 'ArrowRight') {
-                rightPressed = false;
-            }
-            else if(e.key === 'Left' || e.key === 'ArrowLeft') {
-                leftPressed = false;
-            }
-        }
+            update() {
+                // Movimento do jogador
+                if (keys.ArrowLeft && this.x > 0) this.x -= this.speed;
+                if (keys.ArrowRight && this.x < canvas.width - this.width) this.x += this.speed;
+                
+                // Atualiza os tiros
+                this.bullets = this.bullets.filter(bullet => {
+                    bullet.update();
+                    return bullet.y > 0;
+                });
 
-        function drawBall() {
-            ctx.beginPath();
-            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fill();
-            ctx.closePath();
-        }
-
-        function drawPaddle() {
-            ctx.beginPath();
-            ctx.roundRect(paddle.x, canvas.height - paddle.height, paddle.width, paddle.height, 5);
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fill();
-            ctx.closePath();
-        }
-
-        function drawBricks() {
-            for(let c = 0; c < brickColumnCount; c++) {
-                for(let r = 0; r < brickRowCount; r++) {
-                    if(bricks[c][r].status === 1) {
-                        const brickX = (c * (brickWidth + brickPadding)) + brickOffsetLeft;
-                        const brickY = (r * (brickHeight + brickPadding)) + brickOffsetTop;
-                        bricks[c][r].x = brickX;
-                        bricks[c][r].y = brickY;
-                        ctx.beginPath();
-                        ctx.roundRect(brickX, brickY, brickWidth, brickHeight, 5);
-                        ctx.fillStyle = `rgba(255, 255, 255, ${0.5 + (r * 0.1)})`;
-                        ctx.fill();
-                        ctx.closePath();
-                    }
+                // Atira
+                if (keys.Space && Date.now() - this.lastShot > this.shotDelay) {
+                    this.shoot();
+                    this.lastShot = Date.now();
                 }
             }
+
+            shoot() {
+                const bullet = new Bullet(
+                    this.x + this.width / 2,
+                    this.y,
+                    0, // ângulo
+                    -10 // velocidade
+                );
+                this.bullets.push(bullet);
+                playSound('shoot');
+            }
         }
 
-        function collisionDetection() {
-            for(let c = 0; c < brickColumnCount; c++) {
-                for(let r = 0; r < brickRowCount; r++) {
-                    const b = bricks[c][r];
-                    if(b.status === 1) {
-                        if(ball.x > b.x && ball.x < b.x + brickWidth && ball.y > b.y && ball.y < b.y + brickHeight) {
-                            ball.dy = -ball.dy;
-                            b.status = 0;
-                            score++;
-                            scoreElement.textContent = score;
+        class Enemy {
+            constructor() {
+                this.width = 40;
+                this.height = 40;
+                this.x = Math.random() * (canvas.width - this.width);
+                this.y = -this.height;
+                this.speed = 3 + Math.random() * 2;
+                this.health = 100;
+                this.bullets = [];
+                this.lastShot = 0;
+                this.shotDelay = 2000;
+            }
+
+            draw() {
+                ctx.fillStyle = '#ff0000';
+                ctx.beginPath();
+                ctx.moveTo(this.x + this.width / 2, this.y + this.height);
+                ctx.lineTo(this.x + this.width, this.y);
+                ctx.lineTo(this.x, this.y);
+                ctx.closePath();
+                ctx.fill();
+            }
+
+            update() {
+                this.y += this.speed;
+                
+                // Atira periodicamente
+                if (Date.now() - this.lastShot > this.shotDelay) {
+                    this.shoot();
+                    this.lastShot = Date.now();
+                }
+
+                // Atualiza os tiros
+                this.bullets = this.bullets.filter(bullet => {
+                    bullet.update();
+                    return bullet.y < canvas.height;
+                });
+            }
+
+            shoot() {
+                const bullet = new Bullet(
+                    this.x + this.width / 2,
+                    this.y + this.height,
+                    Math.PI, // ângulo
+                    5 // velocidade
+                );
+                this.bullets.push(bullet);
+            }
+        }
+
+        class Bullet {
+            constructor(x, y, angle, speed) {
+                this.x = x;
+                this.y = y;
+                this.radius = 3;
+                this.speed = speed;
+                this.angle = angle;
+            }
+
+            draw() {
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            update() {
+                this.y += this.speed;
+            }
+        }
+
+        class Explosion {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.radius = 2;
+                this.maxRadius = 30;
+                this.opacity = 1;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(255, 100, 0, ${this.opacity})`;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+
+            update() {
+                this.radius += 2;
+                this.opacity -= 0.05;
+                return this.opacity > 0;
+            }
+        }
+
+        // Estado do jogo
+        const keys = {};
+        const player = new Player();
+        let enemies = [];
+        let explosions = [];
+        let gameRunning = true;
+        let lastEnemySpawn = 0;
+        let enemySpawnDelay = 1000;
+
+        // Sons do jogo
+        const sounds = {
+            shoot: new Audio('data:audio/wav;base64,UklGRnQGAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YU8GAACBgIF/gn2Cf4B+gn5+fYJ/gIF/gIB/gH+BfoB+gn5/fX+Af3+AgH99f4F/f4B/gIF/gIGAf4GAf4GAf4GAgoB/gYF/g4CBgIGAgYCBgX+BgICAgICAgH+AgICAgH+AgH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/AA=='),
+            explosion: new Audio('data:audio/wav;base64,UklGRqQDAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YX8DAACBgIF/gn2Cf4B+gn5+fYJ/gIF/gIB/gH+BfoB+gn5/fX+Af3+AgH99f4F/f4B/gIF/gIGAf4GAf4GAf4GAgoB/gYF/g4CBgIGAgYCBgX+BgICAgICAgH+AgICAgH+AgH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/AA==')
+        };
+
+        function playSound(name) {
+            const sound = sounds[name];
+            sound.currentTime = 0;
+            sound.play().catch(() => {}); // Ignora erros de reprodução
+        }
+
+        // Event Listeners
+        window.addEventListener('keydown', (e) => keys[e.code] = true);
+        window.addEventListener('keyup', (e) => keys[e.code] = false);
+
+        // Funções do jogo
+        function spawnEnemy() {
+            if (Date.now() - lastEnemySpawn > enemySpawnDelay) {
+                enemies.push(new Enemy());
+                lastEnemySpawn = Date.now();
+                // Aumenta a dificuldade gradualmente
+                enemySpawnDelay = Math.max(500, enemySpawnDelay - 10);
+            }
+        }
+
+        function checkCollisions() {
+            // Colisão entre tiros do jogador e inimigos
+            player.bullets.forEach((bullet, bulletIndex) => {
+                enemies.forEach((enemy, enemyIndex) => {
+                    if (bullet.x > enemy.x && 
+                        bullet.x < enemy.x + enemy.width &&
+                        bullet.y > enemy.y && 
+                        bullet.y < enemy.y + enemy.height) {
+                        // Remove o tiro e o inimigo
+                        player.bullets.splice(bulletIndex, 1);
+                        enemies.splice(enemyIndex, 1);
+                        // Adiciona explosão e pontos
+                        explosions.push(new Explosion(enemy.x + enemy.width/2, enemy.y + enemy.height/2));
+                        player.score += 100;
+                        playSound('explosion');
+                    }
+                });
+            });
+
+            // Colisão entre tiros inimigos e jogador
+            enemies.forEach(enemy => {
+                enemy.bullets.forEach((bullet, bulletIndex) => {
+                    if (bullet.x > player.x && 
+                        bullet.x < player.x + player.width &&
+                        bullet.y > player.y && 
+                        bullet.y < player.y + player.height) {
+                        // Remove o tiro e reduz vida do jogador
+                        enemy.bullets.splice(bulletIndex, 1);
+                        player.health -= 10;
+                        if (player.health <= 0) {
+                            gameOver();
                         }
                     }
+                });
+            });
+
+            // Colisão entre jogador e inimigos
+            enemies.forEach((enemy, index) => {
+                if (player.x < enemy.x + enemy.width &&
+                    player.x + player.width > enemy.x &&
+                    player.y < enemy.y + enemy.height &&
+                    player.y + player.height > enemy.y) {
+                    enemies.splice(index, 1);
+                    player.health -= 20;
+                    explosions.push(new Explosion(enemy.x + enemy.width/2, enemy.y + enemy.height/2));
+                    if (player.health <= 0) {
+                        gameOver();
+                    }
                 }
-            }
+            });
         }
 
-        function resetGame() {
-            ball.x = canvas.width / 2;
-            ball.y = canvas.height - 30;
-            ball.dx = 3;
-            ball.dy = -3;
-            paddle.x = (canvas.width - paddle.width) / 2;
-            score = 0;
-            scoreElement.textContent = score;
-            
-            // Reset bricks
-            for(let c = 0; c < brickColumnCount; c++) {
-                for(let r = 0; r < brickRowCount; r++) {
-                    bricks[c][r].status = 1;
-                }
-            }
+        function gameOver() {
+            gameRunning = false;
+            gameOverElement.style.display = 'block';
+            finalScoreElement.textContent = player.score;
         }
 
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawBricks();
-            drawBall();
-            drawPaddle();
-            collisionDetection();
-
-            // Ball collision with walls
-            if(ball.x + ball.dx > canvas.width - ball.radius || ball.x + ball.dx < ball.radius) {
-                ball.dx = -ball.dx;
-            }
-            if(ball.y + ball.dy < ball.radius) {
-                ball.dy = -ball.dy;
-            } else if(ball.y + ball.dy > canvas.height - ball.radius) {
-                if(ball.x > paddle.x && ball.x < paddle.x + paddle.width) {
-                    ball.dy = -ball.dy;
-                } else {
-                    resetGame();
-                }
-            }
-
-            // Paddle movement
-            if(rightPressed && paddle.x < canvas.width - paddle.width) {
-                paddle.x += paddle.speed;
-            }
-            else if(leftPressed && paddle.x > 0) {
-                paddle.x -= paddle.speed;
-            }
-
-            ball.x += ball.dx;
-            ball.y += ball.dy;
-
-            requestAnimationFrame(draw);
+        function restartGame() {
+            player.health = 100;
+            player.score = 0;
+            player.x = canvas.width / 2 - player.width / 2;
+            player.bullets = [];
+            enemies = [];
+            explosions = [];
+            gameRunning = true;
+            enemySpawnDelay = 1000;
+            gameOverElement.style.display = 'none';
         }
 
-        draw();
+        function updateGame() {
+            // Limpa o canvas
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (gameRunning) {
+                // Atualiza o jogador
+                player.update();
+                player.draw();
+
+                // Atualiza inimigos
+                spawnEnemy();
+                enemies = enemies.filter(enemy => {
+                    enemy.update();
+                    enemy.draw();
+                    return enemy.y < canvas.height;
+                });
+
+                // Desenha todos os tiros
+                player.bullets.forEach(bullet => bullet.draw());
+                enemies.forEach(enemy => {
+                    enemy.bullets.forEach(bullet => bullet.draw());
+                });
+
+                // Atualiza explosões
+                explosions = explosions.filter(explosion => {
+                    explosion.draw();
+                    return explosion.update();
+                });
+
+                // Verifica colisões
+                checkCollisions();
+
+                // Atualiza HUD
+                scoreElement.textContent = `Pontos: ${player.score}`;
+                healthElement.textContent = `Vida: ${player.health}%`;
+            }
+
+            requestAnimationFrame(updateGame);
+        }
+
+        // Inicia o jogo
+        updateGame();
     </script>
 </body>
 </html>
