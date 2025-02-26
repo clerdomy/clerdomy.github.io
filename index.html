@@ -3,414 +3,363 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Space Combat - Batalha Espacial</title>
+    <title>Portfolio - Clerdomy</title>
     <style>
+        /* Reset e Variáveis */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --background: #0f1729;
+            --surface: #1e293b;
+            --surface-hover: #334155;
+            --text: #f8fafc;
+            --text-secondary: #94a3b8;
+            --gradient: linear-gradient(135deg, #6366f1, #8b5cf6);
+        }
+
         body {
-            background: #000;
-            overflow: hidden;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
         }
 
-        #gameCanvas {
-            width: 100vw;
-            height: 100vh;
-            display: block;
+        /* Layout */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
         }
 
-        #score {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            color: #fff;
-            font-size: 24px;
-            font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        /* Navbar com Gradiente */
+        .navbar {
+            background: var(--gradient);
+            padding: 1.5rem;
+            margin-bottom: 3rem;
+            border-radius: 0 0 2rem 2rem;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.2);
         }
 
-        #health {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            color: #fff;
-            font-size: 24px;
-            font-weight: bold;
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        #gameOver {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.8);
-            padding: 20px;
-            border-radius: 10px;
-            color: #fff;
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity 0.3s;
+        }
+
+        .nav-links a:hover {
+            opacity: 0.8;
+        }
+
+        /* Hero Section */
+        .hero {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 3rem;
+            margin-bottom: 4rem;
+            align-items: center;
+        }
+
+        .profile-card {
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: 1.5rem;
             text-align: center;
-            display: none;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s;
         }
 
-        #gameOver h2 {
-            font-size: 36px;
-            margin-bottom: 20px;
-            color: #ff0000;
+        .profile-card:hover {
+            transform: translateY(-5px);
         }
 
-        #gameOver button {
-            padding: 10px 20px;
-            font-size: 18px;
-            background: #ff0000;
-            border: none;
-            color: #fff;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s;
+        .profile-image {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            margin-bottom: 1.5rem;
+            border: 4px solid var(--primary);
         }
 
-        #gameOver button:hover {
-            background: #cc0000;
+        .profile-name {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .profile-bio {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Skills Section */
+        .skills-section {
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .skill-card {
+            background: var(--surface-hover);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .skill-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .skill-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Repository Grid */
+        .repos-section {
+            margin-top: 3rem;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .repos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .repo-card {
+            background: var(--surface);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            transition: transform 0.3s;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .repo-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .repo-name {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .repo-description {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .repo-card a {
+            transition: transform 0.3s, opacity 0.3s;
+        }
+
+        .repo-card a:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .hero {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas"></canvas>
-    <div id="score">Pontos: 0</div>
-    <div id="health">Vida: 100%</div>
-    <div id="gameOver">
-        <h2>Game Over!</h2>
-        <p>Sua pontuação: <span id="finalScore">0</span></p>
-        <button onclick="restartGame()">Jogar Novamente</button>
+    <nav class="navbar">
+        <div class="nav-content">
+            <div class="nav-brand">
+                <img src="/placeholder.svg" alt="Logo" id="userAvatar" style="width: 40px; height: 40px; border-radius: 50%;">
+            </div>
+            <div class="nav-links">
+                <a href="#skills">Habilidades</a>
+                <a href="#projects">Projetos</a>
+                <a href="#contact">Contato</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <section class="hero">
+            <div class="profile-card">
+                <img src="/placeholder.svg" alt="Profile" id="profileImage" class="profile-image">
+                <h1 class="profile-name" id="userName">Clerdomy Zidor</h1>
+                <p class="profile-bio" id="userBio">Full Stack Developer</p>
+                <div class="profile-links">
+                    <a href="https://github.com/clerdomy" target="_blank" style="margin-right: 1rem;">
+                        <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" 
+                             alt="GitHub" style="width: 24px; height: 24px;">
+                    </a>
+                    <a href="https://linkedin.com/in/clerdomyzidor" target="_blank">
+                        <img src="https://content.linkedin.com/content/dam/me/business/en-us/amp/brand-site/v2/bg/LI-Bug.svg.original.svg" 
+                             alt="LinkedIn" style="width: 24px; height: 24px;">
+                    </a>
+                </div>
+            </div>
+
+            <div class="skills-section" id="skills">
+                <h2 class="section-title">Tecnologias</h2>
+                <div class="skills-grid">
+                    <div class="skill-card">
+                        <div class="skill-icon">🐍</div>
+                        <h3>Python</h3>
+                    </div>
+                    <div class="skill-card">
+                        <div class="skill-icon">🎯</div>
+                        <h3>Django</h3>
+                    </div>
+                    <div class="skill-card">
+                        <div class="skill-icon">🌶️</div>
+                        <h3>Flask</h3>
+                    </div>
+                    <div class="skill-card">
+                        <div class="skill-icon">🐘</div>
+                        <h3>PHP</h3>
+                    </div>
+                    <div class="skill-card">
+                        <div class="skill-icon">🚀</div>
+                        <h3>Laravel</h3>
+                    </div>
+                    <div class="skill-card">
+                        <div class="skill-icon">🌐</div>
+                        <h3>HTML</h3>
+                    </div>
+                    <div class="skill-card">
+                        <div class="skill-icon">🎨</div>
+                        <h3>CSS</h3>
+                    </div>
+                    <div class="skill-card">
+                        <div class="skill-icon">⚡</div>
+                        <h3>JavaScript</h3>
+                    </div>
+                    <div class="skill-card">
+                        <div class="skill-icon">💨</div>
+                        <h3>Tailwind</h3>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="repos-section" id="projects">
+            <h2 class="section-title">Projetos</h2>
+            <div class="repos-grid" id="reposContainer">
+                <!-- Repositórios serão inseridos aqui -->
+            </div>
+        </section>
     </div>
 
     <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const scoreElement = document.getElementById('score');
-        const healthElement = document.getElementById('health');
-        const gameOverElement = document.getElementById('gameOver');
-        const finalScoreElement = document.getElementById('finalScore');
+        const username = 'clerdomy';
 
-        // Configuração do canvas
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+        // Função para formatar data
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('pt-BR', options);
         }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
 
-        // Classes do jogo
-        class Player {
-            constructor() {
-                this.width = 50;
-                this.height = 50;
-                this.x = canvas.width / 2 - this.width / 2;
-                this.y = canvas.height - this.height - 20;
-                this.speed = 8;
-                this.health = 100;
-                this.score = 0;
-                this.bullets = [];
-                this.lastShot = 0;
-                this.shotDelay = 250; // Delay entre tiros em ms
+        // Carregar dados do perfil
+        async function loadProfile() {
+            try {
+                const response = await fetch(`https://api.github.com/users/${username}`);
+                const data = await response.json();
+
+                document.getElementById('userAvatar').src = data.avatar_url;
+                document.getElementById('profileImage').src = data.avatar_url;
+                document.getElementById('userBio').textContent = data.bio || 'Full Stack Developer';
+            } catch (error) {
+                console.error('Error loading profile:', error);
             }
+        }
 
-            draw() {
-                // Desenha a nave do jogador
-                ctx.fillStyle = '#00ff00';
-                ctx.beginPath();
-                ctx.moveTo(this.x + this.width / 2, this.y);
-                ctx.lineTo(this.x + this.width, this.y + this.height);
-                ctx.lineTo(this.x, this.y + this.height);
-                ctx.closePath();
-                ctx.fill();
-
-                // Desenha o efeito de propulsão
-                ctx.fillStyle = '#ff6600';
-                ctx.beginPath();
-                ctx.moveTo(this.x + this.width * 0.3, this.y + this.height);
-                ctx.lineTo(this.x + this.width * 0.5, this.y + this.height + 15);
-                ctx.lineTo(this.x + this.width * 0.7, this.y + this.height);
-                ctx.closePath();
-                ctx.fill();
-            }
-
-            update() {
-                // Movimento do jogador
-                if (keys.ArrowLeft && this.x > 0) this.x -= this.speed;
-                if (keys.ArrowRight && this.x < canvas.width - this.width) this.x += this.speed;
+        // Carregar repositórios
+        async function loadRepositories() {
+            try {
+                const response = await fetch(`https://api.github.com/users/${username}/repos?sort=updated`);
+                const repos = await response.json();
+                const reposContainer = document.getElementById('reposContainer');
                 
-                // Atualiza os tiros
-                this.bullets = this.bullets.filter(bullet => {
-                    bullet.update();
-                    return bullet.y > 0;
-                });
-
-                // Atira
-                if (keys.Space && Date.now() - this.lastShot > this.shotDelay) {
-                    this.shoot();
-                    this.lastShot = Date.now();
-                }
-            }
-
-            shoot() {
-                const bullet = new Bullet(
-                    this.x + this.width / 2,
-                    this.y,
-                    0, // ângulo
-                    -10 // velocidade
-                );
-                this.bullets.push(bullet);
-                playSound('shoot');
-            }
-        }
-
-        class Enemy {
-            constructor() {
-                this.width = 40;
-                this.height = 40;
-                this.x = Math.random() * (canvas.width - this.width);
-                this.y = -this.height;
-                this.speed = 3 + Math.random() * 2;
-                this.health = 100;
-                this.bullets = [];
-                this.lastShot = 0;
-                this.shotDelay = 2000;
-            }
-
-            draw() {
-                ctx.fillStyle = '#ff0000';
-                ctx.beginPath();
-                ctx.moveTo(this.x + this.width / 2, this.y + this.height);
-                ctx.lineTo(this.x + this.width, this.y);
-                ctx.lineTo(this.x, this.y);
-                ctx.closePath();
-                ctx.fill();
-            }
-
-            update() {
-                this.y += this.speed;
-                
-                // Atira periodicamente
-                if (Date.now() - this.lastShot > this.shotDelay) {
-                    this.shoot();
-                    this.lastShot = Date.now();
-                }
-
-                // Atualiza os tiros
-                this.bullets = this.bullets.filter(bullet => {
-                    bullet.update();
-                    return bullet.y < canvas.height;
-                });
-            }
-
-            shoot() {
-                const bullet = new Bullet(
-                    this.x + this.width / 2,
-                    this.y + this.height,
-                    Math.PI, // ângulo
-                    5 // velocidade
-                );
-                this.bullets.push(bullet);
+                reposContainer.innerHTML = repos
+    .map(repo => `
+        <div class="repo-card">
+            <h3 class="repo-name">${repo.name}</h3>
+            <p class="repo-description">${repo.description || 'No description available'}</p>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; gap: 1rem; color: var(--text-secondary);">
+                    <span>⭐ ${repo.stargazers_count}</span>
+                    <span>🔄 ${repo.forks_count}</span>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <a href="https://clerdomy.github.io/${repo.name}" target="_blank" 
+                       style="background: var(--gradient); padding: 0.5rem 1rem; 
+                              border-radius: 0.5rem; text-decoration: none; 
+                              color: white; font-size: 0.9rem;">
+                        Demo 🚀
+                    </a>
+                    <a href="${repo.html_url}" target="_blank" 
+                       style="background: var(--surface-hover); padding: 0.5rem 1rem; 
+                              border-radius: 0.5rem; text-decoration: none; 
+                              color: white; font-size: 0.9rem;">
+                        Código <svg style="width: 14px; height: 14px; display: inline; margin-left: 4px;" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    `)
+    .join('');
+            } catch (error) {
+                console.error('Error loading repositories:', error);
             }
         }
 
-        class Bullet {
-            constructor(x, y, angle, speed) {
-                this.x = x;
-                this.y = y;
-                this.radius = 3;
-                this.speed = speed;
-                this.angle = angle;
-            }
-
-            draw() {
-                ctx.fillStyle = '#fff';
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fill();
-            }
-
-            update() {
-                this.y += this.speed;
-            }
-        }
-
-        class Explosion {
-            constructor(x, y) {
-                this.x = x;
-                this.y = y;
-                this.radius = 2;
-                this.maxRadius = 30;
-                this.opacity = 1;
-            }
-
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.strokeStyle = `rgba(255, 100, 0, ${this.opacity})`;
-                ctx.lineWidth = 2;
-                ctx.stroke();
-            }
-
-            update() {
-                this.radius += 2;
-                this.opacity -= 0.05;
-                return this.opacity > 0;
-            }
-        }
-
-        // Estado do jogo
-        const keys = {};
-        const player = new Player();
-        let enemies = [];
-        let explosions = [];
-        let gameRunning = true;
-        let lastEnemySpawn = 0;
-        let enemySpawnDelay = 1000;
-
-        // Sons do jogo
-        const sounds = {
-            shoot: new Audio('data:audio/wav;base64,UklGRnQGAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YU8GAACBgIF/gn2Cf4B+gn5+fYJ/gIF/gIB/gH+BfoB+gn5/fX+Af3+AgH99f4F/f4B/gIF/gIGAf4GAf4GAf4GAgoB/gYF/g4CBgIGAgYCBgX+BgICAgICAgH+AgICAgH+AgH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/AA=='),
-            explosion: new Audio('data:audio/wav;base64,UklGRqQDAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YX8DAACBgIF/gn2Cf4B+gn5+fYJ/gIF/gIB/gH+BfoB+gn5/fX+Af3+AgH99f4F/f4B/gIF/gIGAf4GAf4GAf4GAgoB/gYF/g4CBgIGAgYCBgX+BgICAgICAgH+AgICAgH+AgH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/gH+Af4B/AA==')
-        };
-
-        function playSound(name) {
-            const sound = sounds[name];
-            sound.currentTime = 0;
-            sound.play().catch(() => {}); // Ignora erros de reprodução
-        }
-
-        // Event Listeners
-        window.addEventListener('keydown', (e) => keys[e.code] = true);
-        window.addEventListener('keyup', (e) => keys[e.code] = false);
-
-        // Funções do jogo
-        function spawnEnemy() {
-            if (Date.now() - lastEnemySpawn > enemySpawnDelay) {
-                enemies.push(new Enemy());
-                lastEnemySpawn = Date.now();
-                // Aumenta a dificuldade gradualmente
-                enemySpawnDelay = Math.max(500, enemySpawnDelay - 10);
-            }
-        }
-
-        function checkCollisions() {
-            // Colisão entre tiros do jogador e inimigos
-            player.bullets.forEach((bullet, bulletIndex) => {
-                enemies.forEach((enemy, enemyIndex) => {
-                    if (bullet.x > enemy.x && 
-                        bullet.x < enemy.x + enemy.width &&
-                        bullet.y > enemy.y && 
-                        bullet.y < enemy.y + enemy.height) {
-                        // Remove o tiro e o inimigo
-                        player.bullets.splice(bulletIndex, 1);
-                        enemies.splice(enemyIndex, 1);
-                        // Adiciona explosão e pontos
-                        explosions.push(new Explosion(enemy.x + enemy.width/2, enemy.y + enemy.height/2));
-                        player.score += 100;
-                        playSound('explosion');
-                    }
-                });
-            });
-
-            // Colisão entre tiros inimigos e jogador
-            enemies.forEach(enemy => {
-                enemy.bullets.forEach((bullet, bulletIndex) => {
-                    if (bullet.x > player.x && 
-                        bullet.x < player.x + player.width &&
-                        bullet.y > player.y && 
-                        bullet.y < player.y + player.height) {
-                        // Remove o tiro e reduz vida do jogador
-                        enemy.bullets.splice(bulletIndex, 1);
-                        player.health -= 10;
-                        if (player.health <= 0) {
-                            gameOver();
-                        }
-                    }
-                });
-            });
-
-            // Colisão entre jogador e inimigos
-            enemies.forEach((enemy, index) => {
-                if (player.x < enemy.x + enemy.width &&
-                    player.x + player.width > enemy.x &&
-                    player.y < enemy.y + enemy.height &&
-                    player.y + player.height > enemy.y) {
-                    enemies.splice(index, 1);
-                    player.health -= 20;
-                    explosions.push(new Explosion(enemy.x + enemy.width/2, enemy.y + enemy.height/2));
-                    if (player.health <= 0) {
-                        gameOver();
-                    }
-                }
-            });
-        }
-
-        function gameOver() {
-            gameRunning = false;
-            gameOverElement.style.display = 'block';
-            finalScoreElement.textContent = player.score;
-        }
-
-        function restartGame() {
-            player.health = 100;
-            player.score = 0;
-            player.x = canvas.width / 2 - player.width / 2;
-            player.bullets = [];
-            enemies = [];
-            explosions = [];
-            gameRunning = true;
-            enemySpawnDelay = 1000;
-            gameOverElement.style.display = 'none';
-        }
-
-        function updateGame() {
-            // Limpa o canvas
-            ctx.fillStyle = '#000';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            if (gameRunning) {
-                // Atualiza o jogador
-                player.update();
-                player.draw();
-
-                // Atualiza inimigos
-                spawnEnemy();
-                enemies = enemies.filter(enemy => {
-                    enemy.update();
-                    enemy.draw();
-                    return enemy.y < canvas.height;
-                });
-
-                // Desenha todos os tiros
-                player.bullets.forEach(bullet => bullet.draw());
-                enemies.forEach(enemy => {
-                    enemy.bullets.forEach(bullet => bullet.draw());
-                });
-
-                // Atualiza explosões
-                explosions = explosions.filter(explosion => {
-                    explosion.draw();
-                    return explosion.update();
-                });
-
-                // Verifica colisões
-                checkCollisions();
-
-                // Atualiza HUD
-                scoreElement.textContent = `Pontos: ${player.score}`;
-                healthElement.textContent = `Vida: ${player.health}%`;
-            }
-
-            requestAnimationFrame(updateGame);
-        }
-
-        // Inicia o jogo
-        updateGame();
+        // Inicializar
+        loadProfile();
+        loadRepositories();
     </script>
 </body>
 </html>
